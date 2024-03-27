@@ -3,6 +3,7 @@ using BinaryMessageEncodingAPI.Models;
 using BinaryMessageEncodingAPI.Services;
 using Microsoft.Extensions.Configuration;
 using Moq;
+using System.Text;
 
 
 namespace BinaryMessageEncodingAPI.nUnitTest
@@ -22,6 +23,8 @@ namespace BinaryMessageEncodingAPI.nUnitTest
         [Test]
         public void Encode_Decode_Success()
         {
+            string messageString = "This is a sample string message.";
+            byte[] payloadBytes = Encoding.UTF8.GetBytes(messageString);
             // Arrange
             var originalMessage = new Message
             {
@@ -30,7 +33,7 @@ namespace BinaryMessageEncodingAPI.nUnitTest
                 { "Content-Type", "application/json" },
                 { "Content-Length", "1024" }
             },
-                Payload = new byte[1024] // Sample payload of 1024 bytes
+                Payload = payloadBytes
             };
 
 
@@ -51,6 +54,7 @@ namespace BinaryMessageEncodingAPI.nUnitTest
             }
             Assert.That(originalMessage.Payload.Length, Is.EqualTo(decodedMessage.Payload.Length));
             Assert.That(originalMessage.Payload, Is.EqualTo(decodedMessage.Payload));
+
         }
     }
 }
