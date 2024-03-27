@@ -4,12 +4,11 @@ namespace BinaryMessageEncodingAPI.Services
 {
     public class MessageCodec: IMessageCodec
     {
-        private readonly IConfiguration _configuration;
         private readonly IMessageValidator _messageValidator;
 
-        public MessageCodec(IConfiguration configuration, IMessageValidator messageValidator)
+
+        public MessageCodec(IMessageValidator messageValidator)
         {
-            _configuration = configuration;
             _messageValidator = messageValidator;
         }
 
@@ -69,12 +68,10 @@ namespace BinaryMessageEncodingAPI.Services
                 using (MemoryStream stream = new MemoryStream(data))
                 using (BinaryReader reader = new BinaryReader(stream))
                 {
-                    var maxHeaderCount = _configuration.GetValue<int>("MaxHeaderCount");
-                    var maxPayloadSize = _configuration.GetValue<int>("MaxPayloadSize");
                     // Read header count
                     byte headerCount = reader.ReadByte();
-                    if (headerCount > maxHeaderCount)
-                        throw new InvalidDataException("Too many headers.");
+                    // Validate headers
+                    _messageValidator.ValidateHeaders(headerCount);
 
                     // Read headers
                     var headers = new Dictionary<string, string>();
@@ -87,8 +84,7 @@ namespace BinaryMessageEncodingAPI.Services
 
                     // Read payload size
                     int payloadSize = reader.ReadInt32();
-                    if (payloadSize > maxPayloadSize)
-                        throw new InvalidDataException("Payload size exceeds maximum limit.");
+                    _messageValidator.ValidatePayloadSize(payloadSize);
 
                     // Read payload
                     byte[] payload = reader.ReadBytes(payloadSize);
@@ -103,6 +99,9 @@ namespace BinaryMessageEncodingAPI.Services
            
         }
 
+    
+
+
         /// <summary>
         /// Writes a string to a binary writer.
         /// </summary>
@@ -111,10 +110,7 @@ namespace BinaryMessageEncodingAPI.Services
         /// <exception cref="ArgumentException"></exception>
         private void WriteString(BinaryWriter writer, string value)
         {
-            var maxHeaderSize = _configuration.GetValue<int>("MaxHeaderSize");
             byte[] bytes = System.Text.Encoding.ASCII.GetBytes(value);
-            if (bytes.Length > maxHeaderSize)
-                throw new ArgumentException($"String exceeds maximum size ({maxHeaderSize}).");
             writer.Write((ushort)bytes.Length);
             writer.Write(bytes);
         }

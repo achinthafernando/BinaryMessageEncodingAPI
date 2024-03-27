@@ -12,12 +12,13 @@ namespace BinaryMessageEncodingAPI.Controllers
             _messageCodec = messageCodec;
         }
 
-        // POST api/message/encode
+        // POST /encode
         [HttpPost("encode")]
         public ActionResult<byte[]> EncodeMessage([FromBody] Message message)
         {
             try
             {
+
                 byte[] encodedData = _messageCodec.Encode(message);
                 return Ok(encodedData);
             }
@@ -27,7 +28,7 @@ namespace BinaryMessageEncodingAPI.Controllers
             }
         }
 
-        // POST api/message/decode
+        // POST /decode
         [HttpPost("decode")]
         public ActionResult<Message> DecodeMessage([FromBody] byte[] data)
         {

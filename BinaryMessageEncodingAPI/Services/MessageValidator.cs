@@ -39,5 +39,31 @@ namespace BinaryMessageEncodingAPI.Services
             if (message.Payload.Length > maxPayloadSize)
                 throw new ArgumentException($"Payload size exceeds maximum limit ({maxPayloadSize}).");
         }
+
+        /// <summary>
+        /// Validate the headers.
+        /// </summary>
+        /// <param name="headerCount"></param>
+        /// <exception cref="InvalidDataException"></exception>
+        public void ValidateHeaders(byte headerCount)
+        {
+            var maxHeaderCount = _configuration.GetValue<int>("MaxHeaderCount");
+            if (headerCount > maxHeaderCount)
+                throw new InvalidDataException("Too many headers.");
+        }
+
+
+        /// <summary>
+        /// Validate the payload size.
+        /// </summary>
+        /// <param name="payloadSize"></param>
+        /// <exception cref="InvalidDataException"></exception>
+        public void ValidatePayloadSize(int payloadSize)
+        {
+            var maxPayloadSize = _configuration.GetValue<int>("MaxPayloadSize");
+            if (payloadSize > maxPayloadSize)
+                throw new InvalidDataException("Payload size exceeds maximum limit.");
+        }
+
     }
 }
